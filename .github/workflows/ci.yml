@@ -46,6 +46,9 @@ jobs:
         
       - name: Check for dependency issues
         run: pip check
+    
+      - name: Create reports directory
+        run: mkdir -p reports
 
       - name: Run Ruff
         run: ruff check .
@@ -53,26 +56,31 @@ jobs:
       - name: Run Black
         run: black --check .
 
-      - name: Run Bandit
-        run: bandit -r . -x tests
+      - name: Run Bandit            
+        run: |
+          bandit -r . -x tests -f json -o reports/bandit-report.json || true
+          bandit -r . -x tests
 
       - name: Run pip-audit
-        run: pip-audit
+        run: |
+          pip-audit -f json -o reports/pip-audit-report.json || true
+          pip-audit
+
 
       - name: Django system checks
         run: python manage.py check
 
       - name: Check for missing migrations
-        run: python manage.py makemigrations --check --dry-run
+        run: python manage.py makemigrations --check --dry-run | tee reports/makemigrations-check.txt
 
       - name: Apply migrations
-        run: python manage.py migrate --noinput
+        run: python manage.py migrate --noinput | tee reports/migrate-output.txt
 
       
       - name: Run Django tests with coverage
         run: |
             coverage run manage.py test -v 2
-            coverage report -m --fail-under=70
+            coverage report -m --fail-under=70 | tee reports/test-output.txt
 
       - name: Generate coverage XML report
         run: coverage xml
