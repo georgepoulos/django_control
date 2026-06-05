@@ -1,5 +1,5 @@
 
-name: Django CI v1
+name: Django CI version1
 
 on:
   push:
@@ -41,6 +41,11 @@ jobs:
         with:
           python-version: "3.12"
           cache: "pip"
+          
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
 
       - name: Show Python version
         run: python --version
