@@ -1,0 +1,68 @@
+name: Django Security Checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  schedule:
+    - cron: "37 17 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  security:
+    name: Bandit and pip-audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Show Python version
+        run: python --version
+
+      - name: Install dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Create security reports directory
+        run: mkdir -p security-reports
+
+      - name: Run Bandit and save JSON report
+        run: |
+          bandit -r . -x tests -f json -o security-reports/bandit-report.json || true
+
+      - name: Show Bandit findings in console
+        continue-on-error: true
+        run: bandit -r . -x tests | tee security-reports/bandit-console.txt
+
+      - name: Run pip-audit and save JSON report
+        run: |
+          pip-audit -f json -o security-reports/pip-audit-report.json || true
+
+      - name: Show pip-audit findings in console
+        continue-on-error: true
+        run: pip-audit | tee security-reports/pip-audit-console.txt
+
+      - name: Upload security reports artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: security-reports/
