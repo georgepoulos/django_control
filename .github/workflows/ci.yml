@@ -8,9 +8,18 @@ on:
     branches:
       - "**"
 
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
   ci:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     env:
       DJANGO_SETTINGS_MODULE: config.settings.dev
@@ -34,6 +43,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements-dev.txt
+        
+      - name: Check for dependency issues
+        run: pip check
 
       - name: Run Ruff
         run: ruff check .
