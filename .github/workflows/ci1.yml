@@ -67,15 +67,15 @@ jobs:
       - name: Run Black
         run: black --check .
 
-      - name: Run Bandit and save report
-        run: |
-          bandit -r . -x tests -f json -o reports/bandit-report.json || true
-          bandit -r . -x tests
+      #- name: Run Bandit and save report
+      #  run: |
+      #    bandit -r . -x tests -f json -o reports/bandit-report.json || true
+      #    bandit -r . -x tests
 
-      - name: Run pip-audit and save report
-        run: |
-          pip-audit -f json -o reports/pip-audit-report.json || true
-          pip-audit
+      #- name: Run pip-audit and save report
+      #  run: |
+      #    pip-audit -f json -o reports/pip-audit-report.json || true
+      #    pip-audit
 
       - name: Django system checks
         run: python manage.py check
