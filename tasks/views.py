@@ -10,4 +10,3 @@ def task_list(request):
 
 def health(request):
     return JsonResponse({"status": "ok"})
-
