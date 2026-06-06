@@ -10,3 +10,7 @@ def task_list(request):
 
 def health(request):
     return JsonResponse({"status": "ok"})
+
+
+def home(request):
+    return JsonResponse({"status": "Welcome to my page"})
